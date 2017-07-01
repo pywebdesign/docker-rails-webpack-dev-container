@@ -1,0 +1,41 @@
+files:
+  image: ubuntu
+  volumes:
+    - ./vendor:/app/vendor
+    - ./dbdata:/var/lib/postgresql/data/
+
+db:
+  image: "postgres:9.5"
+  volumes_from:
+    - files
+webpack:
+  build: ./docker
+  command: ./bin/webpack-dev-server
+  volumes:
+    - .:/app
+  volumes_from:
+    - files
+  ports:
+    - "8080:8080"
+  links:
+    - db
+    - files
+
+
+web:
+  build: ./docker
+  command: bundle exec rails s
+  volumes:
+    - .:/app
+  volumes_from:
+    - files
+  ports:
+    - "3000:3000"
+  links:
+    - db
+    - files
+  environment:
+    - S3_BUCKET_NAME=artprotect
+    - AWS_ACCESS_KEY_ID=AKIAIHXFOWAHAB4CM7XQ
+    - AWS_SECRET_ACCESS_KEY=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
+    - AWS_REGION=us-east-1
